@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1 {
+            text-align: center;
+        }
+        label {
+            display: block;
+            margin: 10px 0;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .result {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Secure Password Generator</h1>
+        <form id="passwordForm">
+            <label>Password Length: <input type="number" id="length" value="20" min="16"></label>
+            <label><input type="checkbox" id="include_upper" checked> Include Uppercase Letters</label>
+            <label><input type="checkbox" id="include_lower" checked> Include Lowercase Letters</label>
+            <label><input type="checkbox" id="include_digits" checked> Include Digits</label>
+            <label><input type="checkbox" id="include_special" checked> Include Special Characters</label>
+            <label><input type="checkbox" id="avoid_similar"> Avoid Visually Similar Characters</label>
+            <button type="submit">Generate Password</button>
+        </form>
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('passwordForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const length = document.getElementById('length').value;
+            const include_upper = document.getElementById('include_upper').checked;
+            const include_lower = document.getElementById('include_lower').checked;
+            const include_digits = document.getElementById('include_digits').checked;
+            const include_special = document.getElementById('include_special').checked;
+            const avoid_similar = document.getElementById('avoid_similar').checked;
+
+            const response = await fetch('/generate-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    length: parseInt(length),
+                    include_upper,
+                    include_lower,
+                    include_digits,
+                    include_special,
+                    avoid_similar
+                })
+            });
+
+            const resultDiv = document.getElementById('result');
+            if (response.ok) {
+                const data = await response.json();
+                resultDiv.innerHTML = `<strong>Password:</strong> ${data.password}<br><strong>Entropy:</strong> ${data.entropy}`;
+            } else {
+                const errorData = await response.json();
+                resultDiv.innerHTML = `<strong>Error:</strong> ${errorData.error}`;
+            }
+        });
+    </script>
+</body>
+</html>
