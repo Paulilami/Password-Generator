@@ -5,11 +5,7 @@ import math
 from collections import Counter
 
 app = Flask(__name__)
-
-# Minimum password length recommended for security
 MIN_PASSWORD_LENGTH = 16
-
-# List of common patterns to avoid (optional, can be expanded)
 COMMON_WEAK_PATTERNS = [
     'password', '123456', 'qwerty', 'letmein', 'welcome', 'iloveyou',
     'admin', 'user', 'guest', 'abc123', 'pass', '000000'
@@ -31,7 +27,7 @@ def check_repeating_characters(password):
     """Check if the password contains too many repeating characters."""
     counts = Counter(password)
     for count in counts.values():
-        if count > (len(password) // 2):  # Arbitrary threshold: 50% repetition
+        if count > (len(password) // 2):  #arbitrary threshold: 50% repetition
             return True
     return False
 
@@ -53,22 +49,19 @@ def generate_password(length=MIN_PASSWORD_LENGTH, include_upper=True, include_lo
         char_set += string.punctuation
 
     if avoid_similar:
-        char_set = char_set.translate(str.maketrans('', '', 'O0lI1'))  # Remove visually similar characters
+        char_set = char_set.translate(str.maketrans('', '', 'O0lI1')) 
 
     if not char_set:
         raise ValueError("At least one character set must be selected")
 
-    # Generate password using cryptographically secure random generator
     password = ''.join(secrets.choice(char_set) for _ in range(length))
 
-    # Security checks to ensure no common weak patterns and minimal repetition
     if check_weak_patterns(password):
         raise ValueError("Generated password matches common weak patterns. Please regenerate.")
     
     if check_repeating_characters(password):
         raise ValueError("Generated password contains too many repeating characters. Please regenerate.")
 
-    # Calculate entropy based on the actual size of the character set used
     entropy = calculate_entropy(length, len(char_set))
 
     return password, entropy
